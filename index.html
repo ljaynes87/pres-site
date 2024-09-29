@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Image Display</title>
+    <style>
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Single Image Display</h1>
+    <img id="current-image" src="" alt="Image will display here" />
+    <button id="change-image-btn">Change Image</button>
+
+    <script>
+        const S3_BASE_URL = 'https://YOUR_BUCKET_NAME.s3.amazonaws.com/';
+        const API_URL = 'https://YOUR_API_ENDPOINT';
+        const imageElement = document.getElementById('current-image');
+
+        // Function to load the image based on the name received from the POST request
+        async function loadImage(imageName) {
+            imageElement.src = S3_BASE_URL + imageName;
+        }
+
+        // Event listener for button click to change image
+        document.getElementById('change-image-btn').addEventListener('click', async () => {
+            const newImageName = prompt("Enter the image name to display (e.g., 'image1.jpg'):");
+            if (newImageName) {
+                await changeImage(newImageName);
+            }
+        });
+
+        // Function to handle the POST request and change the image
+        async function changeImage(imageName) {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ imageName }),
+                });
+
+                if (response.ok) {
+                    await loadImage(imageName); // Load the new image after successful POST
+                } else {
+                    console.error('Error changing image:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error changing image:', error);
+            }
+        }
+
+        // Load the default image on page load
+        loadImage('default_image.jpg');  // Change to your default image
+    </script>
+</body>
+</html>
